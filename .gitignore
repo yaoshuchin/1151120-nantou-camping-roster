@@ -1,0 +1,8 @@
+# 排除含有真實個資、身分證字號、完整掃描原始檔
+*.pdf
+*.xlsx
+*.xls
+*local_real*
+node_modules/
+package-lock.json
+*.log

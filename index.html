@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>南投國中 115學年度二年級隔宿露營名冊與編組查詢系統（資安保護版）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .print-card { break-inside: avoid; border: 1px solid #ccc !important; box-shadow: none !important; }
+      .tab-content { display: block !important; }
+      table { border-collapse: collapse !important; width: 100% !important; }
+      th, td { border: 1px solid #ddd !important; padding: 6px 10px !important; color: black !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-500/20 text-white">
+          投
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            南投國中 115學年度 二年級隔宿露營名冊
+          </h1>
+          <p class="text-xs text-slate-400">戶外教育教學活動・小隊編組／帳篷分配／師長寢室查詢系統</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="window.print()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+          <span>🖨️ 列印報表</span>
+        </button>
+        <button onclick="exportCSV()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition flex items-center gap-1.5 shadow-sm shadow-indigo-600/30">
+          <span>📥 匯出 CSV</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Security Banner -->
+  <div class="bg-slate-900 border-b border-slate-800/80 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between text-xs">
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full border bg-amber-500/10 text-amber-300 border-amber-500/30">
+        🛡️ 資安保護版：依個人資料保護原則，學生與師長姓名第2字已置換為「O」，保護師生個人隱私
+      </span>
+      <span class="text-slate-400 hidden sm:inline">南投縣立南投國民中學 訓育組 製</span>
+    </div>
+  </div>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 no-print">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-medium">學生總人數</div>
+        <div class="text-2xl font-black text-white mt-1">106 <span class="text-xs font-normal text-slate-400">人</span></div>
+        <div class="text-[11px] text-slate-400 mt-1">男 48 / 女 58</div>
+        <div class="absolute -right-2 -bottom-2 text-3xl opacity-10">🎒</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-medium">活動班級數</div>
+        <div class="text-2xl font-black text-indigo-400 mt-1">7 <span class="text-xs font-normal text-slate-400">班</span></div>
+        <div class="text-[11px] text-slate-400 mt-1">201 ~ 207 班</div>
+        <div class="absolute -right-2 -bottom-2 text-3xl opacity-10">🏫</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-medium">野炊小隊數</div>
+        <div class="text-2xl font-black text-emerald-400 mt-1">15 <span class="text-xs font-normal text-slate-400">隊</span></div>
+        <div class="text-[11px] text-slate-400 mt-1">每隊 6~9 人</div>
+        <div class="absolute -right-2 -bottom-2 text-3xl opacity-10">🍳</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-medium">住宿帳篷數</div>
+        <div class="text-2xl font-black text-amber-400 mt-1">27 <span class="text-xs font-normal text-slate-400">帳</span></div>
+        <div class="text-[11px] text-slate-400 mt-1">男 13 / 女 14 帳</div>
+        <div class="absolute -right-2 -bottom-2 text-3xl opacity-10">⛺</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-medium">特殊飲食需求</div>
+        <div class="text-2xl font-black text-rose-400 mt-1">1 <span class="text-xs font-normal text-slate-400">人</span></div>
+        <div class="text-[11px] text-rose-400/80 mt-1">205班 素食 1人</div>
+        <div class="absolute -right-2 -bottom-2 text-3xl opacity-10">🥗</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-medium">隨隊師長</div>
+        <div class="text-2xl font-black text-cyan-400 mt-1">10 <span class="text-xs font-normal text-slate-400">人</span></div>
+        <div class="text-[11px] text-slate-400 mt-1">校長、主任、7導師</div>
+        <div class="absolute -right-2 -bottom-2 text-3xl opacity-10">🧑‍🏫</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center space-x-1 border-b border-slate-800 overflow-x-auto pb-px no-print" id="tabBar">
+      <button onclick="switchTab('roster')" id="tab-roster" class="tab-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 whitespace-nowrap">
+        <span>📋 學生總名冊</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">106</span>
+      </button>
+      <button onclick="switchTab('squads')" id="tab-squads" class="tab-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>🍳 野炊小隊編組</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">15隊</span>
+      </button>
+      <button onclick="switchTab('tents')" id="tab-tents" class="tab-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>⛺ 帳篷住宿分配</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">27帳</span>
+      </button>
+      <button onclick="switchTab('teachers')" id="tab-teachers" class="tab-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>🧑‍🏫 師長名單與寢室</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">10人</span>
+      </button>
+      <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+        <span>📊 統計數據分析</span>
+      </button>
+    </div>
+
+    <!-- Filter & Search Toolbar (Shared across student tabs) -->
+    <div id="filterToolbar" class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3 no-print">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <!-- Search -->
+        <div class="relative w-full sm:w-80">
+          <input type="text" id="searchInput" placeholder="搜尋姓名、座號、職稱、帳號..." oninput="handleSearch()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 pl-9 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+          <span class="absolute left-3 top-2.5 text-slate-500 text-sm">🔍</span>
+        </div>
+        <!-- Select Filters -->
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <select id="genderFilter" onchange="applyFilters()" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">性別：全部</option>
+            <option value="男">男生 (48人)</option>
+            <option value="女">女生 (58人)</option>
+          </select>
+          <select id="dietFilter" onchange="applyFilters()" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">飲食：全部</option>
+            <option value="葷食">葷食</option>
+            <option value="素食">素食 (1人)</option>
+          </select>
+          <button onclick="resetFilters()" class="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs transition">
+            重設
+          </button>
+        </div>
+      </div>
+
+      <!-- Class Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <span class="text-slate-400 font-medium whitespace-nowrap mr-1">班級切換：</span>
+        <button onclick="filterClass('ALL')" class="class-pill px-3 py-1 rounded-full font-medium bg-indigo-600 text-white transition whitespace-nowrap" data-class="ALL">全部班級 (106)</button>
+        <button onclick="filterClass('201')" class="class-pill px-3 py-1 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap" data-class="201">201 (17人)</button>
+        <button onclick="filterClass('202')" class="class-pill px-3 py-1 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap" data-class="202">202 (18人)</button>
+        <button onclick="filterClass('203')" class="class-pill px-3 py-1 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap" data-class="203">203 (15人)</button>
+        <button onclick="filterClass('204')" class="class-pill px-3 py-1 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap" data-class="204">204 (15人)</button>
+        <button onclick="filterClass('205')" class="class-pill px-3 py-1 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap" data-class="205">205 (11人)</button>
+        <button onclick="filterClass('206')" class="class-pill px-3 py-1 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap" data-class="206">206 (9人)</button>
+        <button onclick="filterClass('207')" class="class-pill px-3 py-1 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap" data-class="207">207 (21人)</button>
+      </div>
+    </div>
+
+    <!-- TAB 1: Roster View (Table) -->
+    <div id="view-roster" class="tab-view block space-y-4">
+      <div class="flex items-center justify-between text-xs text-slate-400 no-print">
+        <span id="rosterResultCount">顯示 106 筆資料</span>
+        <span>可點擊欄位快速檢視</span>
+      </div>
+      <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/80 shadow-lg">
+        <table class="min-w-full divide-y divide-slate-800 text-left text-sm">
+          <thead class="bg-slate-900 text-slate-300 font-semibold text-xs tracking-wider">
+            <tr>
+              <th class="py-3 px-3.5">序</th>
+              <th class="py-3 px-3.5">班級</th>
+              <th class="py-3 px-3.5">座號</th>
+              <th class="py-3 px-4">姓名</th>
+              <th class="py-3 px-3">性別</th>
+              <th class="py-3 px-3">飲食</th>
+              <th class="py-3 px-3.5">野炊小隊</th>
+              <th class="py-3 px-3.5">小隊職稱</th>
+              <th class="py-3 px-3.5">帳篷分配</th>
+              <th class="py-3 px-3">身分</th>
+            </tr>
+          </thead>
+          <tbody id="rosterTbody" class="divide-y divide-slate-800/60 font-normal text-slate-200">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: Squads View -->
+    <div id="view-squads" class="tab-view hidden space-y-6">
+      <div class="flex items-center justify-between text-xs text-slate-400 no-print">
+        <span>依班級與小隊展示野炊／烤肉分組（每隊配有小隊長、副小隊長、大廚、二廚、伙伕、水伕、事務、隊員）</span>
+        <span id="squadCountBadge">共 15 個小隊</span>
+      </div>
+      <div id="squadsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TAB 3: Tents View -->
+    <div id="view-tents" class="tab-view hidden space-y-6">
+      <div class="flex items-center justify-between text-xs text-slate-400 no-print">
+        <span>依班級與性別展示帳篷住宿配置（標示室長與室友人數，全二年級共 27 帳）</span>
+        <span id="tentCountBadge">男 13 帳 / 女 14 帳</span>
+      </div>
+      <div id="tentsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TAB 4: Teachers View -->
+    <div id="view-teachers" class="tab-view hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🧑‍🏫 師長名單與寢室分配表</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">校長一人一房、主任一人一房、導師及隨隊人員二人一房</p>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            共 10 位師長
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-800 text-left text-sm">
+            <thead class="bg-slate-950 text-slate-400 text-xs">
+              <tr>
+                <th class="py-2.5 px-3">房型</th>
+                <th class="py-2.5 px-3">職稱</th>
+                <th class="py-2.5 px-3">姓名</th>
+                <th class="py-2.5 px-3">性別</th>
+                <th class="py-2.5 px-3">所屬班級／任務</th>
+                <th class="py-2.5 px-4">寢室配置備註說明</th>
+              </tr>
+            </thead>
+            <tbody id="teachersTbody" class="divide-y divide-slate-800/60 text-slate-200">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: Statistics & Analysis -->
+    <div id="view-stats" class="tab-view hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Class summary table -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>📊 各班參與人數與組數統計表</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-800 text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400">
+                <tr>
+                  <th class="py-2 px-2.5">班級</th>
+                  <th class="py-2 px-2.5">導師</th>
+                  <th class="py-2 px-2 text-right">男</th>
+                  <th class="py-2 px-2 text-right">女</th>
+                  <th class="py-2 px-2.5 text-right font-bold text-white">合計</th>
+                  <th class="py-2 px-2 text-right">素食</th>
+                  <th class="py-2 px-2 text-right">小隊</th>
+                  <th class="py-2 px-2.5 text-right">帳數(男/女)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                
+                <tr>
+                  <td class="py-2 px-2.5 font-bold text-indigo-400">201</td>
+                  <td class="py-2 px-2.5">黃O月</td>
+                  <td class="py-2 px-2 text-right">10</td>
+                  <td class="py-2 px-2 text-right">7</td>
+                  <td class="py-2 px-2.5 text-right font-bold text-white">17</td>
+                  <td class="py-2 px-2 text-right ">0</td>
+                  <td class="py-2 px-2 text-right">2</td>
+                  <td class="py-2 px-2.5 text-right">4 (2男/2女)</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-bold text-indigo-400">202</td>
+                  <td class="py-2 px-2.5">黃O君</td>
+                  <td class="py-2 px-2 text-right">6</td>
+                  <td class="py-2 px-2 text-right">12</td>
+                  <td class="py-2 px-2.5 text-right font-bold text-white">18</td>
+                  <td class="py-2 px-2 text-right ">0</td>
+                  <td class="py-2 px-2 text-right">3</td>
+                  <td class="py-2 px-2.5 text-right">5 (2男/3女)</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-bold text-indigo-400">203</td>
+                  <td class="py-2 px-2.5">林O玟</td>
+                  <td class="py-2 px-2 text-right">6</td>
+                  <td class="py-2 px-2 text-right">9</td>
+                  <td class="py-2 px-2.5 text-right font-bold text-white">15</td>
+                  <td class="py-2 px-2 text-right ">0</td>
+                  <td class="py-2 px-2 text-right">2</td>
+                  <td class="py-2 px-2.5 text-right">4 (2男/2女)</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-bold text-indigo-400">204</td>
+                  <td class="py-2 px-2.5">洪O儒</td>
+                  <td class="py-2 px-2 text-right">7</td>
+                  <td class="py-2 px-2 text-right">8</td>
+                  <td class="py-2 px-2.5 text-right font-bold text-white">15</td>
+                  <td class="py-2 px-2 text-right ">0</td>
+                  <td class="py-2 px-2 text-right">2</td>
+                  <td class="py-2 px-2.5 text-right">4 (2男/2女)</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-bold text-indigo-400">205</td>
+                  <td class="py-2 px-2.5">林O銓</td>
+                  <td class="py-2 px-2 text-right">7</td>
+                  <td class="py-2 px-2 text-right">4</td>
+                  <td class="py-2 px-2.5 text-right font-bold text-white">11</td>
+                  <td class="py-2 px-2 text-right text-rose-400 font-bold">1</td>
+                  <td class="py-2 px-2 text-right">2</td>
+                  <td class="py-2 px-2.5 text-right">3 (2男/1女)</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-bold text-indigo-400">206</td>
+                  <td class="py-2 px-2.5">許O云</td>
+                  <td class="py-2 px-2 text-right">4</td>
+                  <td class="py-2 px-2 text-right">5</td>
+                  <td class="py-2 px-2.5 text-right font-bold text-white">9</td>
+                  <td class="py-2 px-2 text-right ">0</td>
+                  <td class="py-2 px-2 text-right">1</td>
+                  <td class="py-2 px-2.5 text-right">2 (1男/1女)</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-bold text-indigo-400">207</td>
+                  <td class="py-2 px-2.5">黃O瑟</td>
+                  <td class="py-2 px-2 text-right">8</td>
+                  <td class="py-2 px-2 text-right">13</td>
+                  <td class="py-2 px-2.5 text-right font-bold text-white">21</td>
+                  <td class="py-2 px-2 text-right ">0</td>
+                  <td class="py-2 px-2 text-right">3</td>
+                  <td class="py-2 px-2.5 text-right">5 (2男/3女)</td>
+                </tr>
+                <tr class="bg-indigo-950/40 font-bold text-white">
+                  <td class="py-2.5 px-2.5 text-indigo-300">總計</td>
+                  <td class="py-2.5 px-2.5">7位導師</td>
+                  <td class="py-2.5 px-2 text-right text-sky-300">48</td>
+                  <td class="py-2.5 px-2 text-right text-rose-300">58</td>
+                  <td class="py-2.5 px-2.5 text-right text-amber-300">106</td>
+                  <td class="py-2.5 px-2 text-right text-rose-300">1</td>
+                  <td class="py-2.5 px-2 text-right text-emerald-300">15</td>
+                  <td class="py-2.5 px-2.5 text-right text-purple-300">27 帳</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Audit Findings and Special notes -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>🔍 系統稽核校對重要發現</span>
+          </h3>
+          <ul class="space-y-3 text-xs text-slate-300 leading-relaxed">
+            <li class="flex items-start gap-2 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <div>
+                <strong class="text-white">學籍母檔比對完全吻合：</strong>
+                全數 106 名學生座號已交叉比對學籍母檔，完整校正原始掃描手寫落差（如 201班4號林O言、204班14號簡O璇、204班15號羅O茜、206班9號張O棋、207班8號陳O錥等）。
+              </div>
+            </li>
+            <li class="flex items-start gap-2 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+              <span class="text-amber-400 font-bold">!</span>
+              <div>
+                <strong class="text-white">204班女生帳篷座號校正：</strong>
+                原始手寫表件（第9頁）女生帳之 NO 欄位誤填為帳內序號（1~4），已比對小隊表座號完全還原為正確學籍座號。
+              </div>
+            </li>
+            <li class="flex items-start gap-2 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+              <span class="text-indigo-400 font-bold">i</span>
+              <div>
+                <strong class="text-white">編隊風格分析：</strong>
+                204班採純性別編組（男1隊7人、女1隊8人）；207班為純性別配置（2女隊、1男隊）；206班因9人整併為單一大隊；其餘班級皆採男女合編。
+              </div>
+            </li>
+            <li class="flex items-start gap-2 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+              <span class="text-rose-400 font-bold">🥗</span>
+              <div>
+                <strong class="text-white">素食餐飲列印提醒：</strong>
+                205班 21號 張O瑜 為全二年級唯一素食者，露營伙食組與餐廳已獨立註記。
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-900/60 py-6 text-center text-xs text-slate-500 space-y-1 no-print">
+    <div>南投縣立南投國民中學 115學年度二年級隔宿露營名冊管理系統</div>
+    <div>已啟用資安遮罩機制・符合個人資料保護規範</div>
+  </footer>
+
+  <script>
+    // 內嵌資料 (純前端運作，免後端伺服器)
+    const STUDENTS_DATA = [{"index":1,"class":"201","seat":1,"name":"江O婷","gender":"女","studentId":"","team":"第二小隊","role":"大廚","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":2,"class":"201","seat":3,"name":"林O嫻","gender":"女","studentId":"","team":"第二小隊","role":"小隊長","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":3,"class":"201","seat":4,"name":"林O言","gender":"女","studentId":"","team":"第一小隊","role":"副小隊長","tent":"女生1帳","isLeader":true,"diet":"葷食"},{"index":4,"class":"201","seat":7,"name":"陳O涵","gender":"女","studentId":"","team":"第二小隊","role":"二廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":5,"class":"201","seat":8,"name":"陳O翎","gender":"女","studentId":"","team":"第二小隊","role":"副小隊長","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":6,"class":"201","seat":11,"name":"劉O含","gender":"女","studentId":"","team":"第一小隊","role":"小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":7,"class":"201","seat":13,"name":"藍O詒","gender":"女","studentId":"","team":"第一小隊","role":"隊員","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":8,"class":"201","seat":15,"name":"吳O岷","gender":"男","studentId":"","team":"第二小隊","role":"水伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":9,"class":"201","seat":16,"name":"谷O恩","gender":"男","studentId":"","team":"第一小隊","role":"大廚","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":10,"class":"201","seat":17,"name":"林O諼","gender":"男","studentId":"","team":"第一小隊","role":"水伕","tent":"男生1帳","isLeader":true,"diet":"葷食"},{"index":11,"class":"201","seat":18,"name":"張O鈞","gender":"男","studentId":"","team":"第一小隊","role":"二廚","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":12,"class":"201","seat":19,"name":"張O偉","gender":"男","studentId":"","team":"第一小隊","role":"伙伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":13,"class":"201","seat":20,"name":"許O瑋","gender":"男","studentId":"","team":"第二小隊","role":"事務","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":14,"class":"201","seat":21,"name":"陳O廷","gender":"男","studentId":"","team":"第二小隊","role":"隊員","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":15,"class":"201","seat":23,"name":"陳O宗","gender":"男","studentId":"","team":"第一小隊","role":"事務","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":16,"class":"201","seat":24,"name":"湯O丞","gender":"男","studentId":"","team":"第二小隊","role":"伙伕","tent":"男生2帳","isLeader":true,"diet":"葷食"},{"index":17,"class":"201","seat":25,"name":"賴O豪","gender":"男","studentId":"","team":"第一小隊","role":"隊員","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":18,"class":"202","seat":1,"name":"李O甯","gender":"女","studentId":"","team":"第二小隊","role":"副小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":19,"class":"202","seat":2,"name":"李O妮","gender":"女","studentId":"","team":"第二小隊","role":"大廚","tent":"女生1帳","isLeader":true,"diet":"葷食"},{"index":20,"class":"202","seat":5,"name":"胡O薰","gender":"女","studentId":"","team":"第三小隊","role":"副小隊長","tent":"女生3帳","isLeader":false,"diet":"葷食"},{"index":21,"class":"202","seat":6,"name":"張O桔","gender":"女","studentId":"","team":"第三小隊","role":"二廚","tent":"女生3帳","isLeader":false,"diet":"葷食"},{"index":22,"class":"202","seat":7,"name":"郭O琪","gender":"女","studentId":"","team":"第三小隊","role":"大廚","tent":"女生3帳","isLeader":true,"diet":"葷食"},{"index":23,"class":"202","seat":9,"name":"廖O昕","gender":"女","studentId":"","team":"第三小隊","role":"小隊長","tent":"女生3帳","isLeader":false,"diet":"葷食"},{"index":24,"class":"202","seat":10,"name":"黃O薇","gender":"女","studentId":"","team":"第一小隊","role":"小隊長","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":25,"class":"202","seat":11,"name":"黃O蒂","gender":"女","studentId":"","team":"第二小隊","role":"伙伕","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":26,"class":"202","seat":12,"name":"鄭O琳","gender":"女","studentId":"","team":"第二小隊","role":"二廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":27,"class":"202","seat":13,"name":"賴O其","gender":"女","studentId":"","team":"第一小隊","role":"大廚","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":28,"class":"202","seat":14,"name":"簡O懿","gender":"女","studentId":"","team":"第一小隊","role":"二廚","tent":"女生2帳","isLeader":true,"diet":"葷食"},{"index":29,"class":"202","seat":15,"name":"鐘O彤","gender":"女","studentId":"","team":"第一小隊","role":"伙伕","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":30,"class":"202","seat":16,"name":"張O瑋","gender":"男","studentId":"","team":"第一小隊","role":"水伕","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":31,"class":"202","seat":17,"name":"劉O宇","gender":"男","studentId":"","team":"第三小隊","role":"水伕","tent":"男生2帳","isLeader":true,"diet":"葷食"},{"index":32,"class":"202","seat":19,"name":"簡O宸","gender":"男","studentId":"","team":"第三小隊","role":"伙伕","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":33,"class":"202","seat":21,"name":"黃O睿","gender":"男","studentId":"","team":"第二小隊","role":"水伕","tent":"男生1帳","isLeader":true,"diet":"葷食"},{"index":34,"class":"202","seat":23,"name":"葉O毅","gender":"男","studentId":"","team":"第二小隊","role":"小隊長","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":35,"class":"202","seat":24,"name":"廖O惟","gender":"男","studentId":"","team":"第一小隊","role":"副小隊長","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":36,"class":"203","seat":1,"name":"王O芝","gender":"女","studentId":"","team":"第一小隊","role":"小隊長","tent":"女生1帳","isLeader":true,"diet":"葷食"},{"index":37,"class":"203","seat":2,"name":"石O芳","gender":"女","studentId":"","team":"第一小隊","role":"副小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":38,"class":"203","seat":5,"name":"吳O恩","gender":"女","studentId":"","team":"第一小隊","role":"大廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":39,"class":"203","seat":6,"name":"吳O蓉","gender":"女","studentId":"","team":"第一小隊","role":"二廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":40,"class":"203","seat":7,"name":"邱O慈","gender":"女","studentId":"","team":"第二小隊","role":"小隊長","tent":"女生2帳","isLeader":true,"diet":"葷食"},{"index":41,"class":"203","seat":10,"name":"陳O羽","gender":"女","studentId":"","team":"第二小隊","role":"副小隊長","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":42,"class":"203","seat":14,"name":"潘O汝","gender":"女","studentId":"","team":"第一小隊","role":"伙伕","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":43,"class":"203","seat":16,"name":"謝O璇","gender":"女","studentId":"","team":"第二小隊","role":"大廚","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":44,"class":"203","seat":17,"name":"沈O愉","gender":"女","studentId":"","team":"第二小隊","role":"二廚","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":45,"class":"203","seat":18,"name":"許O煜","gender":"男","studentId":"","team":"第一小隊","role":"水伕","tent":"男生1帳","isLeader":true,"diet":"葷食"},{"index":46,"class":"203","seat":23,"name":"陳O熙","gender":"男","studentId":"","team":"第一小隊","role":"事務","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":47,"class":"203","seat":24,"name":"陳O天","gender":"男","studentId":"","team":"第二小隊","role":"伙伕","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":48,"class":"203","seat":25,"name":"陳O瑜","gender":"男","studentId":"","team":"第二小隊","role":"水伕","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":49,"class":"203","seat":28,"name":"蔡O呈","gender":"男","studentId":"","team":"第一小隊","role":"隊員","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":50,"class":"203","seat":29,"name":"李O成","gender":"男","studentId":"","team":"第二小隊","role":"事務","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":51,"class":"204","seat":1,"name":"王O涵","gender":"女","studentId":"","team":"第二小隊","role":"事務","tent":"女生1帳","isLeader":true,"diet":"葷食"},{"index":52,"class":"204","seat":2,"name":"余O婷","gender":"女","studentId":"","team":"第二小隊","role":"大廚","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":53,"class":"204","seat":6,"name":"洪O瑄","gender":"女","studentId":"","team":"第二小隊","role":"副小隊長","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":54,"class":"204","seat":7,"name":"張O晴","gender":"女","studentId":"","team":"第二小隊","role":"小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":55,"class":"204","seat":10,"name":"陳O妘","gender":"女","studentId":"","team":"第二小隊","role":"伙伕","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":56,"class":"204","seat":11,"name":"劉O硯","gender":"女","studentId":"","team":"第二小隊","role":"隊員","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":57,"class":"204","seat":14,"name":"簡O璇","gender":"女","studentId":"","team":"第二小隊","role":"二廚","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":58,"class":"204","seat":15,"name":"羅O茜","gender":"女","studentId":"","team":"第二小隊","role":"水伕","tent":"女生2帳","isLeader":true,"diet":"葷食"},{"index":59,"class":"204","seat":18,"name":"林O澄","gender":"男","studentId":"","team":"第一小隊","role":"大廚","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":60,"class":"204","seat":19,"name":"張O帆","gender":"男","studentId":"","team":"第一小隊","role":"副小隊長","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":61,"class":"204","seat":20,"name":"許O翔","gender":"男","studentId":"","team":"第一小隊","role":"伙伕","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":62,"class":"204","seat":21,"name":"陳O昇","gender":"男","studentId":"","team":"第一小隊","role":"事務","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":63,"class":"204","seat":23,"name":"陳O光","gender":"男","studentId":"","team":"第一小隊","role":"小隊長","tent":"男生1帳","isLeader":true,"diet":"葷食"},{"index":64,"class":"204","seat":25,"name":"劉O振","gender":"男","studentId":"","team":"第一小隊","role":"二廚","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":65,"class":"204","seat":26,"name":"蕭O皓","gender":"男","studentId":"","team":"第一小隊","role":"水伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":66,"class":"205","seat":1,"name":"吳O瑜","gender":"女","studentId":"","team":"第二小隊","role":"副小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":67,"class":"205","seat":11,"name":"黃O薇","gender":"女","studentId":"","team":"第二小隊","role":"大廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":68,"class":"205","seat":13,"name":"劉O硯","gender":"女","studentId":"","team":"第二小隊","role":"小隊長","tent":"女生1帳","isLeader":true,"diet":"葷食"},{"index":69,"class":"205","seat":15,"name":"鄭O妮","gender":"女","studentId":"","team":"第二小隊","role":"二廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":70,"class":"205","seat":18,"name":"吳O鋒","gender":"男","studentId":"","team":"第一小隊","role":"副小隊長","tent":"男生2帳","isLeader":true,"diet":"葷食"},{"index":71,"class":"205","seat":19,"name":"林O竹","gender":"男","studentId":"","team":"第一小隊","role":"小隊長","tent":"男生1帳","isLeader":true,"diet":"葷食"},{"index":72,"class":"205","seat":21,"name":"張O瑜","gender":"男","studentId":"","team":"第一小隊","role":"事務","tent":"男生2帳","isLeader":false,"diet":"素食"},{"index":73,"class":"205","seat":23,"name":"郭O佑","gender":"男","studentId":"","team":"第一小隊","role":"二廚","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":74,"class":"205","seat":25,"name":"陳O庭","gender":"男","studentId":"","team":"第一小隊","role":"伙伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":75,"class":"205","seat":26,"name":"簡O宇","gender":"男","studentId":"","team":"第一小隊","role":"大廚","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":76,"class":"205","seat":28,"name":"嚴O諭","gender":"男","studentId":"","team":"第一小隊","role":"水伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":77,"class":"206","seat":2,"name":"李O榕","gender":"女","studentId":"","team":"第一小隊","role":"隊員","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":78,"class":"206","seat":3,"name":"林O妤","gender":"女","studentId":"","team":"第一小隊","role":"二廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":79,"class":"206","seat":4,"name":"范O英","gender":"女","studentId":"","team":"第一小隊","role":"大廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":80,"class":"206","seat":6,"name":"陳O臻","gender":"女","studentId":"","team":"第一小隊","role":"事務","tent":"女生1帳","isLeader":true,"diet":"葷食"},{"index":81,"class":"206","seat":7,"name":"廖O慈","gender":"女","studentId":"","team":"第一小隊","role":"小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":82,"class":"206","seat":8,"name":"吳O文","gender":"男","studentId":"","team":"第一小隊","role":"水伕","tent":"男生1帳","isLeader":true,"diet":"葷食"},{"index":83,"class":"206","seat":9,"name":"張O棋","gender":"男","studentId":"","team":"第一小隊","role":"伙伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":84,"class":"206","seat":10,"name":"洪O倫","gender":"男","studentId":"","team":"第一小隊","role":"副小隊長","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":85,"class":"206","seat":11,"name":"曾O承","gender":"男","studentId":"","team":"第一小隊","role":"隊員","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":86,"class":"207","seat":1,"name":"古O潼","gender":"女","studentId":"","team":"第一小隊","role":"水伕","tent":"女生3帳","isLeader":false,"diet":"葷食"},{"index":87,"class":"207","seat":2,"name":"吳O桐","gender":"女","studentId":"","team":"第二小隊","role":"小隊長","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":88,"class":"207","seat":3,"name":"林O妤","gender":"女","studentId":"","team":"第二小隊","role":"副小隊長","tent":"女生2帳","isLeader":true,"diet":"葷食"},{"index":89,"class":"207","seat":4,"name":"胡O熙","gender":"女","studentId":"","team":"第一小隊","role":"伙伕","tent":"女生3帳","isLeader":false,"diet":"葷食"},{"index":90,"class":"207","seat":5,"name":"張O瑄","gender":"女","studentId":"","team":"第一小隊","role":"二廚","tent":"女生1帳","isLeader":true,"diet":"葷食"},{"index":91,"class":"207","seat":6,"name":"郭O岑","gender":"女","studentId":"","team":"第一小隊","role":"小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":92,"class":"207","seat":7,"name":"陳O伶","gender":"女","studentId":"","team":"第一小隊","role":"事務","tent":"女生3帳","isLeader":false,"diet":"葷食"},{"index":93,"class":"207","seat":8,"name":"陳O錥","gender":"女","studentId":"","team":"第二小隊","role":"大廚","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":94,"class":"207","seat":9,"name":"黃O浠","gender":"女","studentId":"","team":"第一小隊","role":"副小隊長","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":95,"class":"207","seat":10,"name":"詹O靜","gender":"女","studentId":"","team":"第一小隊","role":"大廚","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":96,"class":"207","seat":11,"name":"廖O涵","gender":"女","studentId":"","team":"第二小隊","role":"二廚","tent":"女生3帳","isLeader":true,"diet":"葷食"},{"index":97,"class":"207","seat":12,"name":"蕭O晨","gender":"女","studentId":"","team":"第二小隊","role":"伙伕","tent":"女生2帳","isLeader":false,"diet":"葷食"},{"index":98,"class":"207","seat":13,"name":"簡O緹","gender":"女","studentId":"","team":"第二小隊","role":"水伕","tent":"女生1帳","isLeader":false,"diet":"葷食"},{"index":99,"class":"207","seat":14,"name":"吳O霆","gender":"男","studentId":"","team":"第三小隊","role":"小隊長","tent":"男生1帳","isLeader":true,"diet":"葷食"},{"index":100,"class":"207","seat":15,"name":"呂O辰","gender":"男","studentId":"","team":"第三小隊","role":"副小隊長","tent":"男生2帳","isLeader":true,"diet":"葷食"},{"index":101,"class":"207","seat":16,"name":"林O福","gender":"男","studentId":"","team":"第三小隊","role":"大廚","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":102,"class":"207","seat":17,"name":"林O旻","gender":"男","studentId":"","team":"第三小隊","role":"二廚","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":103,"class":"207","seat":18,"name":"洪O熙","gender":"男","studentId":"","team":"第三小隊","role":"伙伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":104,"class":"207","seat":19,"name":"張O睿","gender":"男","studentId":"","team":"第三小隊","role":"水伕","tent":"男生1帳","isLeader":false,"diet":"葷食"},{"index":105,"class":"207","seat":20,"name":"許O瀚","gender":"男","studentId":"","team":"第三小隊","role":"事務","tent":"男生2帳","isLeader":false,"diet":"葷食"},{"index":106,"class":"207","seat":21,"name":"黃O壬","gender":"男","studentId":"","team":"第三小隊","role":"隊員","tent":"男生1帳","isLeader":false,"diet":"葷食"}];
+    const TEACHERS_DATA = [{"roomType":"1人房","role":"校長","name":"劉O彥","gender":"男","class":"全校總領隊","note":"校長一人一房"},{"roomType":"1人房","role":"主任","name":"董O遠","gender":"男","class":"學務處主任","note":"主任一人一房"},{"roomType":"2人房","role":"導師","name":"許O云","gender":"女","class":"206班導師","note":"二人一房（與黃O月同房）"},{"roomType":"2人房","role":"導師","name":"黃O月","gender":"女","class":"201班導師","note":"二人一房（與許O云同房）"},{"roomType":"2人房","role":"導師","name":"洪O儒","gender":"女","class":"204班導師","note":"二人一房（與林O玟同房）"},{"roomType":"2人房","role":"導師","name":"林O玟","gender":"女","class":"203班導師","note":"二人一房（與洪O儒同房）"},{"roomType":"2人房","role":"導師","name":"黃O君","gender":"女","class":"202班導師","note":"二人一房"},{"roomType":"2人房","role":"導師","name":"黃O瑟","gender":"女","class":"207班導師","note":"二人一房"},{"roomType":"2人房","role":"導師","name":"林O銓","gender":"男","class":"205班導師","note":"二人一房（待排配同房師長）"},{"roomType":"待確認","role":"隨隊師長","name":"隨O人員","gender":"男","class":"行政支援","note":"調查表統計男師長4人，尚缺1位男性隨隊師長名單"}];
+
+    let currentClass = 'ALL';
+    let currentGender = 'ALL';
+    let currentDiet = 'ALL';
+    let searchQuery = '';
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-500', 'text-indigo-400');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+
+      const activeView = document.getElementById('view-' + tabId);
+      const activeBtn = document.getElementById('tab-' + tabId);
+      if (activeView) activeView.classList.remove('hidden');
+      if (activeBtn) {
+        activeBtn.classList.add('border-indigo-500', 'text-indigo-400');
+        activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      }
+
+      const toolbar = document.getElementById('filterToolbar');
+      if (tabId === 'teachers' || tabId === 'stats') {
+        toolbar.classList.add('hidden');
+      } else {
+        toolbar.classList.remove('hidden');
+      }
+    }
+
+    function filterClass(cls) {
+      currentClass = cls;
+      document.querySelectorAll('.class-pill').forEach(btn => {
+        if (btn.getAttribute('data-class') === cls) {
+          btn.classList.remove('bg-slate-800', 'text-slate-300');
+          btn.classList.add('bg-indigo-600', 'text-white');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-slate-800', 'text-slate-300');
+        }
+      });
+      renderAll();
+    }
+
+    function applyFilters() {
+      currentGender = document.getElementById('genderFilter').value;
+      currentDiet = document.getElementById('dietFilter').value;
+      renderAll();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderAll();
+    }
+
+    function resetFilters() {
+      currentClass = 'ALL';
+      currentGender = 'ALL';
+      currentDiet = 'ALL';
+      searchQuery = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('genderFilter').value = 'ALL';
+      document.getElementById('dietFilter').value = 'ALL';
+      filterClass('ALL');
+    }
+
+    function getFilteredStudents() {
+      return STUDENTS_DATA.filter(s => {
+        if (currentClass !== 'ALL' && s.class !== currentClass) return false;
+        if (currentGender !== 'ALL' && s.gender !== currentGender) return false;
+        if (currentDiet !== 'ALL' && s.diet !== currentDiet) return false;
+        if (searchQuery) {
+          const match = 
+            s.name.toLowerCase().includes(searchQuery) ||
+            s.class.includes(searchQuery) ||
+            String(s.seat).includes(searchQuery) ||
+            s.role.includes(searchQuery) ||
+            s.team.includes(searchQuery) ||
+            s.tent.includes(searchQuery);
+          if (!match) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderAll() {
+      renderRoster();
+      renderSquads();
+      renderTents();
+      renderTeachers();
+    }
+
+    // 渲染名冊表格
+    function renderRoster() {
+      const list = getFilteredStudents();
+      const tbody = document.getElementById('rosterTbody');
+      document.getElementById('rosterResultCount').innerText = `顯示 ${list.length} / ${STUDENTS_DATA.length} 筆學生資料`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="py-8 text-center text-slate-500 text-sm">無符合條件之學生</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map((s, idx) => {
+        const genderBadge = s.gender === '男' 
+          ? '<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20">男</span>'
+          : '<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">女</span>';
+        
+        const dietBadge = s.diet === '素食'
+          ? '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">素食</span>'
+          : '<span class="text-slate-400 text-xs">葷</span>';
+
+        const roleColor = s.role.includes('隊長') 
+          ? 'text-indigo-400 font-semibold' 
+          : (s.role.includes('廚') ? 'text-amber-400' : 'text-slate-300');
+
+        const isLeaderBadge = s.isLeader 
+          ? '<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">室長</span>' 
+          : '<span class="text-slate-500 text-xs">室友</span>';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-2.5 px-3.5 text-xs text-slate-500">${idx + 1}</td>
+            <td class="py-2.5 px-3.5 font-bold text-indigo-400">${s.class}</td>
+            <td class="py-2.5 px-3.5 font-mono text-slate-300">${s.seat}號</td>
+            <td class="py-2.5 px-4 font-bold text-white">${s.name}</td>
+            <td class="py-2.5 px-3">${genderBadge}</td>
+            <td class="py-2.5 px-3">${dietBadge}</td>
+            <td class="py-2.5 px-3.5 text-xs text-slate-300">${s.team}</td>
+            <td class="py-2.5 px-3.5 text-xs ${roleColor}">${s.role}</td>
+            <td class="py-2.5 px-3.5 text-xs text-slate-300">${s.tent}</td>
+            <td class="py-2.5 px-3">${isLeaderBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 渲染小隊卡片
+    function renderSquads() {
+      const list = getFilteredStudents();
+      const container = document.getElementById('squadsContainer');
+
+      const squadMap = {};
+      list.forEach(s => {
+        const key = `${s.class} - ${s.team}`;
+        if (!squadMap[key]) {
+          squadMap[key] = {
+            class: s.class,
+            team: s.team,
+            members: []
+          };
+        }
+        squadMap[key].members.push(s);
+      });
+
+      const keys = Object.keys(squadMap).sort();
+      document.getElementById('squadCountBadge').innerText = `共 ${keys.length} 個小隊分組`;
+
+      if (keys.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500">無符合條件之小隊</div>';
+        return;
+      }
+
+      container.innerHTML = keys.map(k => {
+        const sq = squadMap[k];
+        const roleOrder = ['小隊長', '副小隊長', '大廚', '二廚', '伙伕', '水伕', '事務', '隊員'];
+        sq.members.sort((a, b) => roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role));
+
+        const boysCount = sq.members.filter(m => m.gender === '男').length;
+        const girlsCount = sq.members.filter(m => m.gender === '女').length;
+
+        return `
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-md space-y-3 print-card">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <div>
+                <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 mr-1.5">${sq.class}班</span>
+                <span class="font-bold text-white text-sm">${sq.team}</span>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                ${sq.members.length} 人 (男${boysCount} / 女${girlsCount})
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+              ${sq.members.map(m => {
+                const isLeader = m.role.includes('長');
+                const badgeClass = isLeader ? 'text-indigo-400 font-bold' : 'text-slate-400';
+                return `
+                  <div class="flex items-center justify-between py-1 px-2 rounded hover:bg-slate-800/50 transition">
+                    <div class="flex items-center space-x-2">
+                      <span class="w-14 ${badgeClass}">${m.role}</span>
+                      <span class="text-slate-400 font-mono w-7">${m.seat}號</span>
+                      <span class="font-semibold text-slate-200">${m.name}</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                      <span class="text-[10px] text-slate-500">${m.gender}</span>
+                      ${m.diet === '素食' ? '<span class="text-[10px] text-emerald-400 font-bold px-1.5 py-0.2 rounded bg-emerald-500/20">素</span>' : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染帳篷卡片
+    function renderTents() {
+      const list = getFilteredStudents();
+      const container = document.getElementById('tentsContainer');
+
+      const tentMap = {};
+      list.forEach(s => {
+        const key = `${s.class} - ${s.tent}`;
+        if (!tentMap[key]) {
+          tentMap[key] = {
+            class: s.class,
+            tent: s.tent,
+            gender: s.tent.includes('男') ? '男' : '女',
+            members: []
+          };
+        }
+        tentMap[key].members.push(s);
+      });
+
+      const keys = Object.keys(tentMap).sort();
+      document.getElementById('tentCountBadge').innerText = `共 ${keys.length} 帳`;
+
+      if (keys.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500">無符合條件之帳篷</div>';
+        return;
+      }
+
+      container.innerHTML = keys.map(k => {
+        const t = tentMap[k];
+        const isBoy = t.gender === '男';
+        const borderHeader = isBoy ? 'border-sky-500/20 bg-sky-500/5' : 'border-rose-500/20 bg-rose-500/5';
+        const tagColor = isBoy ? 'bg-sky-500/20 text-sky-300' : 'bg-rose-500/20 text-rose-300';
+
+        const leader = t.members.find(m => m.isLeader);
+
+        return `
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-md space-y-3 print-card">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 ${borderHeader} -mx-4 -mt-4 p-3 rounded-t-xl">
+              <div>
+                <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 mr-1.5">${t.class}班</span>
+                <span class="font-bold text-white text-sm">${t.tent}</span>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded ${tagColor} font-semibold">
+                ${t.gender}生・${t.members.length} 人
+              </span>
+            </div>
+
+            <div class="text-xs text-amber-300/90 flex items-center gap-1.5 pt-1">
+              <span>👑 室長：</span>
+              <span class="font-bold text-white">${leader ? `${leader.seat}號 ${leader.name}` : '（依小隊協議）'}</span>
+            </div>
+
+            <div class="space-y-1.5 text-xs pt-1 border-t border-slate-800/80">
+              <div class="text-[11px] text-slate-400 font-medium">帳內成員：</div>
+              ${t.members.map(m => `
+                <div class="flex items-center justify-between py-1 px-2 rounded hover:bg-slate-800/50 transition">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-slate-400 font-mono w-7">${m.seat}號</span>
+                    <span class="font-medium text-slate-200">${m.name}</span>
+                    ${m.isLeader ? '<span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30">室長</span>' : ''}
+                  </div>
+                  <span class="text-slate-500 text-[11px]">${m.team}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染師長名單
+    function renderTeachers() {
+      const tbody = document.getElementById('teachersTbody');
+      tbody.innerHTML = TEACHERS_DATA.map(t => {
+        const roomBadge = t.roomType === '1人房'
+          ? '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">一人一房</span>'
+          : '<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">二人一房</span>';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-2.5 px-3">${roomBadge}</td>
+            <td class="py-2.5 px-3 font-semibold text-white">${t.role}</td>
+            <td class="py-2.5 px-3 font-bold text-cyan-300">${t.name}</td>
+            <td class="py-2.5 px-3 text-xs text-slate-400">${t.gender}</td>
+            <td class="py-2.5 px-3 text-xs text-indigo-400 font-medium">${t.class}</td>
+            <td class="py-2.5 px-4 text-xs text-slate-300">${t.note}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 匯出 CSV 功能
+    function exportCSV() {
+      const list = getFilteredStudents();
+      let csv = "\uFEFF流水號,班級,座號,姓名,性別,飲食,野炊小隊,小隊職稱,帳篷組別,身分\n";
+      list.forEach((s, i) => {
+        csv += `${i + 1},${s.class},${s.seat},"${s.name}",${s.gender},${s.diet},${s.team},${s.role},${s.tent},${s.isLeader ? '室長' : '室友'}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "南投國中115隔宿露營名冊.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
